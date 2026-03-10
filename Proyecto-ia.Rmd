@@ -1,0 +1,12 @@
+---
+title: "Proyecto IA"
+author: "Carles Alemany Lorente"
+date: "2026-03-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
