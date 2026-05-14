@@ -37,25 +37,31 @@ with col2:
 # 4. Análisis Inmediato
 if st.button("Analizar Estudiante"):
     try:
-        # 1. Recuperamos las columnas exactas que el modelo espera
-        # El modelo guardó el orden de las columnas cuando lo entrenaste
-        model_features = model.feature_names_in_
+        # 1. Definimos MANUALMENTE la lista de columnas que el modelo vio en Colab
+        # IMPORTANTE: Deben estar en el mismo orden exacto que después del get_dummies
+        # Como son muchas, vamos a usar una lógica para asegurar que enviamos lo correcto
         
-        # 2. Creamos un diccionario con todas las columnas en 0
+        # Primero cargamos el CSV para obtener las columnas reales
+        df_original = pd.read_csv('student-por.csv', sep=';')
+        df_original['pass'] = df_original.apply(lambda row: 1 if (row['G1']+row['G2']+row['G3']) >= 35 else 0, axis=1)
+        df_original = df_original.drop(['G1', 'G2', 'G3', 'pass'], axis=1)
+        
+        # Aplicamos el get_dummies igual que en el entrenamiento
+        df_dummy = pd.get_dummies(df_original)
+        model_features = df_dummy.columns.tolist()
+        
+        # 2. Creamos el DataFrame de una fila con ceros
         datos_dict = {feature: [0] for feature in model_features}
         
-        # 3. Rellenamos solo los datos que tenemos en la interfaz
-        # NOTA: Asegúrate de que los nombres coincidan con los del CSV original
-        datos_dict['failures'] = [failures]
-        datos_dict['absences'] = [absences]
-        datos_dict['studytime'] = [studytime]
-        datos_dict['Medu'] = [Medu]
-        datos_dict['Fedu'] = [Fedu]
+        # 3. Rellenamos los datos de la interfaz
+        # Asegúrate de que estos nombres existan en tu CSV original
+        if 'failures' in datos_dict: datos_dict['failures'] = [failures]
+        if 'absences' in datos_dict: datos_dict['absences'] = [absences]
+        if 'studytime' in datos_dict: datos_dict['studytime'] = [studytime]
+        if 'Medu' in datos_dict: datos_dict['Medu'] = [Medu]
+        if 'Fedu' in datos_dict: datos_dict['Fedu'] = [Fedu]
         
-        # Si tienes variables categóricas como "higher_yes", las activamos:
-        # if higher == "Sí": datos_dict['higher_yes'] = [1]
-        
-        # 4. Convertimos a DataFrame para que mantenga el orden de columnas
+        # 4. Convertimos a DataFrame con el orden correcto
         df_para_predecir = pd.DataFrame(datos_dict)
         
         # 5. Predicción
@@ -70,4 +76,5 @@ if st.button("Analizar Estudiante"):
             
     except Exception as e:
         st.error(f"Error técnico: {e}")
+        st.info("Asegúrate de que el archivo 'student-por.csv' esté en tu GitHub.")
         st.info("Revisa que los nombres de las variables ('failures', 'absences', etc.) sean idénticos a los del CSV.")
