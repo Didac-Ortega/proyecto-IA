@@ -36,13 +36,30 @@ with col2:
 
 # 4. Análisis Inmediato
 if st.button("Analizar Estudiante"):
-    # Creamos el array con los datos capturados
-    # El orden debe ser el mismo que usaste en d_train_att.columns
-    datos_para_predecir = np.array([[Medu, Fedu, studytime, failures, absences]])
-    
     try:
-        # Predicción
-        resultado = model.predict(datos_para_predecir)
+        # 1. Recuperamos las columnas exactas que el modelo espera
+        # El modelo guardó el orden de las columnas cuando lo entrenaste
+        model_features = model.feature_names_in_
+        
+        # 2. Creamos un diccionario con todas las columnas en 0
+        datos_dict = {feature: [0] for feature in model_features}
+        
+        # 3. Rellenamos solo los datos que tenemos en la interfaz
+        # NOTA: Asegúrate de que los nombres coincidan con los del CSV original
+        datos_dict['failures'] = [failures]
+        datos_dict['absences'] = [absences]
+        datos_dict['studytime'] = [studytime]
+        datos_dict['Medu'] = [Medu]
+        datos_dict['Fedu'] = [Fedu]
+        
+        # Si tienes variables categóricas como "higher_yes", las activamos:
+        # if higher == "Sí": datos_dict['higher_yes'] = [1]
+        
+        # 4. Convertimos a DataFrame para que mantenga el orden de columnas
+        df_para_predecir = pd.DataFrame(datos_dict)
+        
+        # 5. Predicción
+        resultado = model.predict(df_para_predecir)
         
         st.markdown("---")
         if resultado[0] == 1:
@@ -52,8 +69,5 @@ if st.button("Analizar Estudiante"):
             st.error("### 📉 RESULTADO: El alumno está en RIESGO DE SUSPENDER.")
             
     except Exception as e:
-        st.error(f"Error técnico: El modelo esperaba más datos de los enviados.")
-        st.info("Nota: Si usaste 'get_dummies' con muchas columnas, el modelo necesita que le enviemos todas esas columnas (sexo, escuela, etc.) aunque no las usemos aquí.")
-
-st.markdown("---")
-st.caption("Proyecto de IA - Entrenamiento basado en Dataset UCI Student Performance")
+        st.error(f"Error técnico: {e}")
+        st.info("Revisa que los nombres de las variables ('failures', 'absences', etc.) sean idénticos a los del CSV.")
