@@ -16,7 +16,7 @@ def get_trained_model():
     
     # Ajustamos el umbral a 30 (más equilibrado)
     # Nota: G1+G2+G3 tiene un máximo de 60 puntos.
-    d['pass'] = d.apply(lambda row: 1 if (row['G1']+row['G2']+row['G3']) >= 30 else 0, axis=1)
+    d['pass'] = d.apply(lambda row: 1 if (row['G1']+row['G2']+row['G3']) >= 32 else 0, axis=1)
     
     y = d['pass']
     X = d.drop(['G1', 'G2', 'G3', 'pass'], axis=1)
@@ -25,7 +25,7 @@ def get_trained_model():
     X = pd.get_dummies(X)
     
     # Entrenar con peso equilibrado para que no ignore a los que suspenden
-    t = tree.DecisionTreeClassifier(criterion="entropy", max_depth=5, class_weight='balanced')
+    t = tree.DecisionTreeClassifier(criterion="entropy", max_depth=10, class_weight='balanced')
     t.fit(X, y)
     
     return t, X.columns.tolist()
