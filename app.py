@@ -25,7 +25,7 @@ def get_trained_model():
     X = pd.get_dummies(X)
     
     # Entrenar con peso equilibrado para que no ignore a los que suspenden
-    t = tree.DecisionTreeClassifier(criterion="entropy", max_depth=5, class_weight='balanced')
+    t = tree.DecisionTreeClassifier(criterion="entropy", max_depth=3, class_weight='balanced')
     t.fit(X, y)
     
     return t, X.columns.tolist()
